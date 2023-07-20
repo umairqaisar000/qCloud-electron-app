@@ -1,12 +1,4 @@
-.clickable {
-  cursor: pointer;
-}
-.icon-row {
-  width: 2em;
-}
-.icon-folder {
-  width: 1em;
-}
-.icon-file {
-  width: 0.75em;
+body{
+    background: rgb(8,8,61);
+    background: linear-gradient(90deg, rgba(8,8,61,1) 0%, rgba(2,0,36,1) 11%, rgba(30,5,54,1) 84%, rgba(56,9,71,1) 100%);
 }
