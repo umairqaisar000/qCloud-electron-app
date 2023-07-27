@@ -1,9 +1,7 @@
 const Docker = window.require('dockerode')
 const { exec } = window.require('child_process')
 
-
 const docker = new Docker()
-var RUNNING_CONTAINER = false
 
 const execShellCommand = cmd => {
   return new Promise((resolve, reject) => {
@@ -17,31 +15,18 @@ const execShellCommand = cmd => {
   })
 }
 
-async function createAndStartDocker(imageName, container_image_name) {
+export async function createAndStartDocker(imageName, container_image_name) {
   const PORT = 2222
 
-  if (RUNNING_CONTAINER) {
-    console.log('Container already running, please stop it first.')
-    return {
-      status:
-        'Container already running. Please stop it by calling the docker_stop endpoint.'
-    }
-  }
-
   console.log('Creating Docker image...')
-
   try {
     await execShellCommand(
-      `docker build --rm -t ${imageName} -f src/server/Dockerfile .`
+      `docker build --rm -t ${imageName} -f /home/qlu/Projects/fs-Qcloud-Electron/react-electron/src/server/Dockerfile .`
     )
   } catch (error) {
     console.error('Error Creating Docker image:', error)
-    return {
-      status: 'Error Creating Docker image'
-    }
+    throw 'Error Creating Docker image'
   }
-
-  RUNNING_CONTAINER = true
 
   console.log('Running Docker container...')
   try {
@@ -51,13 +36,31 @@ async function createAndStartDocker(imageName, container_image_name) {
     )
   } catch (error) {
     console.error('Error running Docker container:', error)
-    RUNNING_CONTAINER = false
-    return {
-      status: 'Error running Docker container'
-    }
+    throw 'Error running Docker container'
   }
 }
 
-module.exports = {
-  createAndStartDocker
+
+
+export function stopAndDeleteContainer(imageName) {
+  // Stop the container
+  const stopCommand = `docker stop ${imageName}`;
+  exec(stopCommand, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error stopping the container: ${imageName}`);
+      console.error(stderr);
+    } else {
+      console.log(`Container ${imageName} stopped successfully.`);
+      // Delete the container
+      const deleteCommand = `docker rm ${imageName}`;
+      exec(deleteCommand, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error deleting the container: ${imageName}`);
+          console.error(stderr);
+        } else {
+          console.log(`Container ${imageName} deleted successfully.`);
+        }
+      });
+    }
+  });
 }

@@ -1,17 +1,22 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Tray, Menu } = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
+
+let tray
+let win
 
 require('@electron/remote/main').initialize()
 
 function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: __dirname + '/logo.png',
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      contextIsolation: false
     }
   })
 
@@ -20,9 +25,52 @@ function createWindow() {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, '../build/index.html')}`
   )
+
+  win.on('close', event => {
+    event.preventDefault()
+    win.hide()
+  })
 }
 
-app.on('ready', createWindow)
+app.on('ready', () => {
+  createWindow()
+  tray = new Tray(path.join(__dirname, '/cloud-computing.png'))
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show App',
+      click: () => {
+        win.show()
+      }
+    },
+    {
+      label: 'Quit',
+      click: () => {
+        tray.destroy()
+        // If in development mode, quit directly
+        if (isDev) {
+          app.quit()
+        } else {
+          // For production mode, ensure all windows are closed before quitting
+          if (!win.isDestroyed()) {
+            win.destroy()
+          }
+        }
+      }
+    }
+  ])
+
+  tray.setToolTip('QCloud')
+  tray.setContextMenu(contextMenu)
+
+  tray.on('click', () => {
+    win.isVisible() ? win.hide() : win.show()
+  })
+})
+
+// app.on('before-quit', () => {
+//   tray.destroy();
+// });
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {

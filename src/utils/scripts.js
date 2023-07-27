@@ -1,9 +1,9 @@
+const os = window.require('os')
+const ngrok = window.require('ngrok')
 const si = window.require('systeminformation')
 const { exec } = window.require('child_process')
-const ngrok = window.require('ngrok')
-const os = window.require('os')
 
-const getSystemSpecs = async () => {
+export const getSystemSpecs = async () => {
   try {
     const [gpuMemoryInfo, cpuUsageInfo, ramMemoryInfo] = await Promise.all([
       getGPUMemoryInfo(),
@@ -22,7 +22,7 @@ const getSystemSpecs = async () => {
   }
 }
 
-const execShellCommand = cmd => {
+export const execShellCommand = cmd => {
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {
       if (error) {
@@ -35,30 +35,29 @@ const execShellCommand = cmd => {
 }
 
 const getGPUMemoryInfo = () => {
-  //   const command =
-  //     'nvidia-smi --query-gpu=name,memory.free,memory.used,memory.total --format=csv,noheader,nounits'
+    const command =
+      'nvidia-smi --query-gpu=name,memory.free,memory.used,memory.total --format=csv,noheader,nounits'
 
-  //   return execShellCommand(command)
-  //     .then(result => {
-  //       const memoryInfo = result.trim().split('\n')
-  //       const gpuInfoList = []
+    return execShellCommand(command)
+      .then(result => {
+        const memoryInfo = result.trim().split('\n')
+        const gpuInfoList = []
 
-  //       for (const gpuInfo of memoryInfo) {
-  //         const [name, free, used, total] = gpuInfo.split(', ')
-  //         gpuInfoList.push({
-  //           name,
-  //           free: parseInt(free),
-  //           used: parseInt(used),
-  //           total: parseInt(total)
-  //         })
-  //       }
+        for (const gpuInfo of memoryInfo) {
+          const [name, free, used, total] = gpuInfo.split(', ')
+          gpuInfoList.push({
+            name,
+            free: parseInt(free),
+            used: parseInt(used),
+            total: parseInt(total)
+          })
+        }
 
-  //       return []
-  //     })
-  //     .catch(error => {
-  //       return []
-  //     })
-  return []
+        return gpuInfoList;
+      })
+      .catch(error => {
+        return []
+      })
 }
 
 const getCPUUsage = () => {
@@ -99,20 +98,12 @@ const getRAMUsage = () => {
     })
 }
 
-
-
-
-
-
-
-
-
-
-
-const getNgrokUrl = async () => {
-  await ngrok.upgradeConfig({ relocate: true })
-  const url = await ngrok.connect({ proto: 'tcp', addr: 2222 })
+export const getNgrokUrl = async () => {
+  const url = await ngrok.connect({
+    proto: 'tcp',
+    addr: 2222,
+    authtoken: '2SkN5WEvYetwQVt4gLkqiQ5S0Av_4Ly9WjG4inH7wa6F1jvMq',
+    region: 'us'
+  })
   return url
 }
-
-module.exports = { getSystemSpecs, execShellCommand, getNgrokUrl }

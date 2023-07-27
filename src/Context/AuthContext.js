@@ -5,13 +5,13 @@ import { pool } from '../database/PoolConnection'
 export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [userData, setUserData] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const login = (username, password) => {
+  const login = (id , email) => {
     setIsAuthenticated(true)
     localStorage.setItem('isAuthenticated', true)
-    localStorage.setItem('userData', JSON.stringify({ username, password }))
+    localStorage.setItem('userData', JSON.stringify({id, email }))
   }
 
   const logout = async () => {

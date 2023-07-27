@@ -1,7 +1,16 @@
 {
-  "name": "electron-react",
+  "name": "qcloud-test",
+  "productName": "Qcloud",
   "version": "0.1.0",
   "private": true,
+  "main": "public/main.js",
+  "homepage": "./",
+  "proxy": "http://localhost:3000",
+  "author": {
+    "name": "Qcloud dev",
+    "email": "qcloud@gmail.com"
+  },
+  "description": "QCloud Test",
   "dependencies": {
     "@electron/remote": "^1.0.2",
     "@testing-library/jest-dom": "^5.11.4",
@@ -14,8 +23,8 @@
     "electron-is-dev": "^1.2.0",
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
-    "ngrok": "^5.0.0-beta.2",
-    "node-pty": "^1.0.0",
+    "ioredis": "^5.3.2",
+    "ngrok": "^4.3.3",
     "pg": "^8.11.1",
     "react": "^17.0.1",
     "react-bootstrap": "^2.8.0",
@@ -28,28 +37,43 @@
     "web-vitals": "^0.2.4",
     "yup": "^1.2.0"
   },
-  "main": "public/main.js",
-  "homepage": "./",
   "scripts": {
     "start": "react-scripts start",
+    "prebuild": "node src/setup.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron:serve": "concurrently -k \"cross-env BROWSER=none npm start\" \"npm run electron:start\"",
-    "electron:build": "npm run build && electron-builder -c.extraMetadata.main=build/main.js",
-    "electron:start": "wait-on tcp:3000 && electron ."
+    "electron:build": "rm -rf dist && rm -rf build && npm run build && electron-builder -c.extraMetadata.main=build/main.js",
+    "electron:start": "wait-on tcp:3000 && electron .",
+    "electron:package:linux": "npm run build && electron-builder -l -c.extraMetadata.main=build/main.js"
   },
   "build": {
     "extends": null,
-    "appId": "com.example.electron-cra",
+    "appId": "com.electron.myapp",
+    "productName": "QCloud",
     "files": [
       "dist/**/*",
       "build/**/*",
       "node_modules/**/*",
       "package.json"
     ],
+    "extraResources": [
+      "./extraResources/**"
+    ],
     "directories": {
       "buildResources": "assets"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "deb",
+      "category": "Development",
+      "icon": "build/logo.png"
     }
   },
   "eslintConfig": {
@@ -60,22 +84,26 @@
   },
   "browserslist": {
     "production": [
+      "last 1 electron version",
       ">0.2%",
       "not dead",
       "not op_mini all"
     ],
     "development": [
+      "last 1 electron version",
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "concurrently": "^5.3.0",
     "cross-env": "^7.0.3",
-    "electron": "^11.2.1",
-    "electron-builder": "^22.9.1",
+    "electron": "^11.5.0",
+    "electron-builder": "^22.14.13",
+    "electronmon": "^2.0.2",
     "prettier": "^2.2.1",
-    "wait-on": "^5.2.1"
+    "wait-on": "^5.3.0"
   }
 }

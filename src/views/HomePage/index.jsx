@@ -2,8 +2,11 @@ import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SystemSpecs from "../../components/SystemSpecs"
 import { AuthContext } from '../../Context/AuthContext';
-
+import { removeGpuData } from '../../database/GpuData'
+import { removeSshCredientials } from '../../database/sshData'
 import "./style.css"
+const ngrok = window.require('ngrok')
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -11,6 +14,9 @@ const HomePage = () => {
 
   const handleLogout = () => {
     logout();
+    removeGpuData();
+    removeSshCredientials();
+    ngrok.disconnect();
     navigate("/");
   };
 
