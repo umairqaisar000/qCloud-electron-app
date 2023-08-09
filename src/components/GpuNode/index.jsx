@@ -23,6 +23,7 @@ const GpuNode = ({ systemSpecs,isRunning }) => {
   const handleLend = async () => {
     try {
       if (systemSpecs) {
+        
         await createAndStartDocker(IMAGE_NAME, CONTAINER_IMAGE_NAME)
         const image_id = await execShellCommand(`docker images -q ${IMAGE_NAME}`)
         const user_id = JSON.parse(localStorage.getItem('userData')).id
