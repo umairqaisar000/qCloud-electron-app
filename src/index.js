@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
+ import "qlu-20-ui-library/dist/index.css";
 
 import App from './App'
 

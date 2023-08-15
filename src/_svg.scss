@@ -1,0 +1,59 @@
+@import "./colors";
+
+@mixin svgFillStroke($color: $gray-300) {
+    > svg {
+        > path {
+            transition:
+                fill 300ms ease-in-out,
+                stroke 300ms ease-in-out;
+            fill: $color;
+            stroke: $color;
+        }
+        > circle {
+            transition:
+                fill 300ms ease-in-out,
+                stroke 300ms ease-in-out;
+            fill: $color;
+            stroke: $color;
+        }
+        > rect {
+            transition:
+                fill 300ms ease-in-out,
+                stroke 300ms ease-in-out;
+            fill: $color;
+            stroke: $color;
+        }
+    }
+}
+@mixin svgStroke($color: $gray-300) {
+    > svg {
+        > path {
+            transition: stroke 300ms ease-in-out;
+            stroke: $color;
+        }
+        > circle {
+            transition: stroke 300ms ease-in-out;
+            stroke: $color;
+        }
+        > rect {
+            transition: stroke 300ms ease-in-out;
+            stroke: $color;
+        }
+    }
+}
+@mixin svgFill($color: $gray-300) {
+    > svg {
+        > path {
+            transition: fill 300ms ease-in-out;
+            fill: $color;
+        }
+        > circle {
+            transition: fill 300ms ease-in-out;
+            fill: $color;
+        }
+        > rect {
+            transition: fill 300ms ease-in-out;
+            fill: $color;
+        }
+    }
+}

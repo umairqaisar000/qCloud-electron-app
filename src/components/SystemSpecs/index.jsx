@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import GpuNode from '../GpuNode';
 import { execShellCommand, getSystemSpecs } from '../../utils/scripts';
 import { getImageId } from '../../database/GpuData'
-
+import './style.scss'
 const SystemSpecs = () => {
 const [systemSpecs, setSystemSpecs] = useState(null);
 const [isRunning, setIsRunning] = useState(false);
@@ -39,12 +39,11 @@ if (!systemSpecs) {
 }
 
 return (
-    <div>
+    <div> 
         <hr/>
-        <h2 className='mt-4 text-warning'>List of available GPUs:</h2>
-        <div className='d-flex'>
+         <div className='card-container'> 
             <GpuNode systemSpecs={systemSpecs} isRunning={isRunning}/>
-        </div>
+        </div> 
     </div>
 );
 };

@@ -1,0 +1,239 @@
+@import url("https://fonts.googleapis.com/css?family=Inter:100,200,300,400,500,600,700,800,900");
+@import url("https://fonts.googleapis.com/css?family=Rubik:100,200,300,400,500,600,700,800,900");
+@import "./colors";
+
+@mixin fontAlpha() {
+  font-family: Inter;
+}
+
+@mixin fontBeta() {
+  font-family: Rubik;
+  text-transform: uppercase;
+}
+
+@mixin text-xs(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 12px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 18px
+) {
+  @include fontAlpha();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-sm(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 14px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 21px
+) {
+  @include fontAlpha();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-base(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 16px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 24px
+) {
+  @include fontAlpha();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-lg(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 18px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 27px
+) {
+  @include fontAlpha();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-xl(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 20px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 30px
+) {
+  @include fontAlpha();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-xxl(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 700,
+  $size: 24px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 36px
+) {
+  @include fontAlpha();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-xs-beta(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 12px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 18px
+) {
+  @include fontBeta();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-sm-beta(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 14px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 21px
+) {
+  @include fontBeta();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-base-beta(
+  $color: $orange-990,
+  $bgColor: transparent,
+  $weight: 500,
+  $size: 16px,
+  $padding: 0,
+  $margin: 0,
+  $lineHeight: 24px
+) {
+  @include fontBeta();
+  color: $color;
+  background-color: $bgColor;
+  margin: $margin;
+  padding: $padding;
+  font-weight: $weight;
+  font-size: $size;
+  line-height: $lineHeight;
+}
+
+@mixin text-size-xs() {
+  @include fontAlpha();
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+@mixin text-size-sm() {
+  @include fontAlpha();
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+}
+
+@mixin text-size-base() {
+  @include fontAlpha();
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+@mixin text-size-lg() {
+  @include fontAlpha();
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+@mixin text-size-xl() {
+  @include fontAlpha();
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 30px;
+}
+
+@mixin text-size-xs-beta() {
+  @include fontBeta();
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+@mixin text-size-sm-beta() {
+  @include fontBeta();
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+}
+
+@mixin text-size-base-beta() {
+  @include fontBeta();
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}

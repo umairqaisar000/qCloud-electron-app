@@ -21,7 +21,7 @@ export async function createAndStartDocker(imageName, container_image_name) {
   console.log('Creating Docker image...')
   try {
     await execShellCommand(
-      `docker build --rm -t ${imageName} -f /home/qlu/Projects/fs-Qcloud-Electron/react-electron/src/server/Dockerfile .`
+      `docker build --rm -t ${imageName} -f /home/shireen/Desktop/qcloud1.0/qCloud-electron-app/src/server/Dockerfile .`
     )
   } catch (error) {
     console.error('Error Creating Docker image:', error)

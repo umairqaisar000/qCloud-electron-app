@@ -1,0 +1,61 @@
+.gpuNodeContainer {
+    width: 257px;
+    height: 360px;
+    margin-top: 24px;
+    display: flex;
+    padding: 20px 24px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+    border-radius: 12px !important;
+    background-color: transparent !important;
+    color: white !important;
+    border: 1px solid var(--gray-700, #373737);
+  
+    .MuiCardContent-root {
+      width: 100%;
+    }
+    .text-secondary {
+      color: var(--gray-300, #868686);
+      /* Rubik/Uppercase Regular */
+      font-family: Rubik;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 146.023%; /* 20.443px */
+      text-transform: uppercase;
+    }
+    .text-primary {
+      color: #fff;
+      /* Rubik/Uppercase Regular */
+      font-family: Rubik;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 146.023%; /* 20.443px */
+      text-transform: uppercase;
+    }
+    // .callButton {
+    .xsSize--SecondaryButton {
+      margin-top: 30px;
+      margin-left: 14px;
+      width: 100%;
+    }
+    // }
+  
+    .gpu-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 24px 0px;
+    }
+  
+    .btn-section {
+      width: 100%;
+      .secondaryButtonGeneric {
+        margin: 12px auto;
+  
+      }
+    }
+  }
