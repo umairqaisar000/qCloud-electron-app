@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SystemSpecs from '../../components/SystemSpecs'
 import { AuthContext } from '../../Context/AuthContext'
-import { removeGpuData } from '../../database/GpuData'
+import { removeGpuData,updateGpuStatus } from '../../database/GpuData'
 import { removeSshCredientials } from '../../database/sshData'
 import TopBar from '../../components/TopBar'
 import { SecondaryButton } from 'qlu-20-ui-library'
@@ -13,10 +13,31 @@ const HomePage = () => {
   const navigate = useNavigate()
   const { logout } = useContext(AuthContext)
 
-  const handleLogout = () => {
-    logout()
-    removeGpuData()
-    removeSshCredientials()
+  // const handleWithdraw = async () => {
+  //   try {
+  //     await removeSshCredientials()
+  //     await removeGpuData()
+  //     await stopAndDeleteContainer(IMAGE_NAME)
+  //     await ngrok.disconnect()
+  //     setIsLend(false)
+  //   } catch (err) {
+  //     setErrorMessage(
+  //       'Withdrawal failed. Please try again. Error: ' + err.message
+  //     )
+  //     setTimeout(() => setErrorMessage(err), 5000) // Clear error message after 5 seconds
+  //     console.log(err)
+  //   }
+  // }
+
+  const handleLogout = async () => {
+    
+    // removeSshCredientials()
+    // removeGpuData()
+        const user_id = JSON.parse(localStorage.getItem('userData')).id
+        console.log("User_idddddddd",user_id);
+        await updateGpuStatus(user_id, 'disconnected'); // Update gpu_status to 'active'
+      
+        logout()
     ngrok.disconnect()
     navigate('/')
   }

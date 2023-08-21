@@ -6,12 +6,18 @@ export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null)
+  const [isLend, setIsLend] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const login = (id , email) => {
+  const login = (id, email) => {
     setIsAuthenticated(true)
     localStorage.setItem('isAuthenticated', true)
-    localStorage.setItem('userData', JSON.stringify({id, email }))
+    localStorage.setItem('userData', JSON.stringify({ id, email }))
+  }
+
+  const lend = (lend) => {
+    setIsLend(lend)
+    localStorage.setItem('isLend', isLend)
   }
 
   const logout = async () => {
@@ -24,7 +30,9 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userData, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, userData, login, lend, logout }}
+    >
       {children}
     </AuthContext.Provider>
   )

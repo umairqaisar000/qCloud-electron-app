@@ -9,6 +9,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { addJob, setJobState, updateJob } from "../../reducers/gpuDataSlice";
 import { SecondaryButton } from "qlu-20-ui-library";
+import { addGpuData, removeGpuData } from '../../database/GpuData'
+import { getImageId } from '../../database/GpuData'
 import GpuLogo from "../../assets/Group.svg";
 import "./style.scss";
 
@@ -97,6 +99,7 @@ const GpuCard= ({
   };
 
   useEffect(() => {
+    console.log("hellloooooooooo i am in GPU-Card");
     const setParams = () => {
       setSelectedGpu({
         gpu_name: gpu?.name,
@@ -106,6 +109,35 @@ const GpuCard= ({
       });
     };
     setParams();
+    const addDataToDb = async () => {
+      try {
+        const systemSpecs = {
+          gpu: [
+            {
+              name: gpu?.name,
+              free: gpu?.free,
+              used: gpu?.used,
+              total: gpu?.total,
+            },
+          ],
+          ram: {
+            free: ram?.free,
+            used: ram?.used,
+          },
+          cpu: cpu,
+        };
+        const image_id = await execShellCommand(
+          `docker images -q ${IMAGE_NAME}`
+        )
+        const user_id = JSON.parse(localStorage.getItem('userData')).id
+  
+        await addGpuData(systemSpecs, user_id, image_id);
+      } catch (error) {
+        console.error('Error adding GPU data to the database', error);
+      }
+    };
+  
+    addDataToDb();
   }, []);
 
   return (

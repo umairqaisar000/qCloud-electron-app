@@ -41,26 +41,43 @@ export async function createAndStartDocker(imageName, container_image_name) {
 }
 
 
-
-export function stopAndDeleteContainer(imageName) {
+export async function stopAndDeleteContainer(imageName) {
   // Stop the container
   const stopCommand = `docker stop ${imageName}`;
-  exec(stopCommand, (error, stdout, stderr) => {
-    if (error) {
+  exec(stopCommand, (stopError, stopStdout, stopStderr) => {
+    if (stopError) {
       console.error(`Error stopping the container: ${imageName}`);
-      console.error(stderr);
+      console.error(stopStderr);
     } else {
       console.log(`Container ${imageName} stopped successfully.`);
+
       // Delete the container
-      const deleteCommand = `docker rm ${imageName}`;
-      exec(deleteCommand, (error, stdout, stderr) => {
-        if (error) {
+      const deleteContainerCommand = `docker rm ${imageName}`;
+      exec(deleteContainerCommand, (deleteContainerError, deleteContainerStdout, deleteContainerStderr) => {
+        if (deleteContainerError) {
           console.error(`Error deleting the container: ${imageName}`);
-          console.error(stderr);
+          console.error(deleteContainerStderr);
         } else {
           console.log(`Container ${imageName} deleted successfully.`);
+
+          // Now that the container is deleted, you can delete the image
+          const deleteImageCommand = `docker rmi ${imageName}`;
+          exec(deleteImageCommand, (deleteImageError, deleteImageStdout, deleteImageStderr) => {
+            if (deleteImageError) {
+              console.error(`Error deleting the image: ${imageName}`);
+              console.error(deleteImageStderr);
+            } else {
+              console.log(`Image ${imageName} deleted successfully.`);
+            }
+          });
         }
       });
     }
   });
 }
+
+
+
+
+
+

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-
 import GpuNode from '../GpuNode';
 import { execShellCommand, getSystemSpecs } from '../../utils/scripts';
 import { getImageId } from '../../database/GpuData'
@@ -17,6 +16,7 @@ useEffect(() => {
         console.log('Image Id: ' + imageId);
         if(imageId){
             const status = await execShellCommand(`docker ps --filter "ancestor=${imageId}" --format "{{.Status}}"`)
+            console.log('Image Status: ' + status);
             if(status.split(" ")[0] === "Up"){
                 setIsRunning(true)
             }else{
@@ -26,6 +26,7 @@ useEffect(() => {
 
         const specs = await getSystemSpecs();
         setSystemSpecs(specs);
+        console.log('Specs: ' , systemSpecs);
     } catch (error) {
         console.error('Error retrieving system specs:', error);
     }

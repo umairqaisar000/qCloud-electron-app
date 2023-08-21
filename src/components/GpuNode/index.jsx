@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { Alert } from 'react-bootstrap'
-import { addGpuData, removeGpuData } from '../../database/GpuData'
+import { addGpuData, removeGpuData,updateGpuStatus,checkExistingRecord } from '../../database/GpuData'
 import { removeSshCredientials } from '../../database/sshData'
 import {
   createAndStartDocker,
@@ -22,21 +22,36 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
   const [errorMessage, setErrorMessage] = useState('')
   const [isLend, setIsLend] = useState(isRunning)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  console.log("Running????",isRunning);
 
   const handleLend = async () => {
     try {
+      const gpu_status='active'
+      const gpu_index=systemSpecs['gpu'][0].index;
+      const user_id = JSON.parse(localStorage.getItem('userData')).id
+     console.log("SystemSpecs",systemSpecs['gpu'][0].index)
+
+     const existingRecord = await checkExistingRecord(user_id, gpu_index);
+     if(!existingRecord){
       if (systemSpecs) {
         await createAndStartDocker(IMAGE_NAME, CONTAINER_IMAGE_NAME)
         const image_id = await execShellCommand(
           `docker images -q ${IMAGE_NAME}`
         )
-        const user_id = JSON.parse(localStorage.getItem('userData')).id
+        
         console.log(user_id, image_id)
-        await addGpuData(systemSpecs, user_id, image_id)
+        await addGpuData(systemSpecs, user_id, image_id,gpu_status);
         setShowSuccessMessage(true)
         setIsLend(true)
         setTimeout(() => setShowSuccessMessage(false), 5000)
       }
+     }
+     else{
+      await updateGpuStatus(user_id, gpu_status);
+      setShowSuccessMessage(true);
+      setIsLend(true);
+     }
+      
     } catch (err) {
       setErrorMessage('Lending failed. Please try again. Error: ' + err.message)
       setTimeout(() => setErrorMessage(err), 5000) // Clear error message after 5 seconds
@@ -46,10 +61,12 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
 
   const handleWithdraw = async () => {
     try {
-      await removeSshCredientials()
-      await removeGpuData()
+      //  await removeSshCredientials()
+      //  await removeGpuData()
       await stopAndDeleteContainer(IMAGE_NAME)
       await ngrok.disconnect()
+      const user_id = JSON.parse(localStorage.getItem('userData')).id
+      await updateGpuStatus(user_id, 'inactive');
       setIsLend(false)
     } catch (err) {
       setErrorMessage(

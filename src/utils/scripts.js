@@ -35,31 +35,31 @@ export const execShellCommand = cmd => {
 }
 
 const getGPUMemoryInfo = () => {
-    const command =
-      'nvidia-smi --query-gpu=name,memory.free,memory.used,memory.total --format=csv,noheader,nounits'
+  const command =
+    'nvidia-smi --query-gpu=index,name,memory.free,memory.used,memory.total --format=csv,noheader,nounits'
 
-    return execShellCommand(command)
-      .then(result => {
-        const memoryInfo = result.trim().split('\n')
-        const gpuInfoList = []
+  return execShellCommand(command)
+    .then(result => {
+      const memoryInfo = result.trim().split('\n')
+      const gpuInfoList = []
 
-        for (const gpuInfo of memoryInfo) {
-          const [name, free, used, total] = gpuInfo.split(', ')
-          gpuInfoList.push({
-            name,
-            free: parseInt(free),
-            used: parseInt(used),
-            total: parseInt(total)
-          })
-        }
+      for (const gpuInfo of memoryInfo) {
+        const [index, name, free, used, total] = gpuInfo.split(', ')
+        gpuInfoList.push({
+          index: parseInt(index), // Parse GPU index
+          name,
+          free: parseInt(free),
+          used: parseInt(used),
+          total: parseInt(total)
+        })
+      }
 
-        return gpuInfoList;
-      })
-      .catch(error => {
-        return []
-      })
+      return gpuInfoList;
+    })
+    .catch(error => {
+      return []
+    })
 }
-
 const getCPUUsage = () => {
   const cpus = os.cpus()
 

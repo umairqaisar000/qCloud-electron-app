@@ -45,7 +45,7 @@ const LoginPage = () => {
   const handleLogin = async () => {
     setEmailError('')
     setPasswordError('')
-
+  
     if (!email && !password) {
       setEmailError('Email is required')
 
