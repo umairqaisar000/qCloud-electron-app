@@ -10,7 +10,9 @@ export const addGpuData = async (
   const gpuDataList = systemSpecs['gpu'];
   const ramData = systemSpecs['ram'];
   const cpuData = systemSpecs['cpu'];
-console.log("gpustatuss",gpu_status);
+  const org_id = JSON.parse(localStorage.getItem("userData")).org_id;
+  console.log("org iddddd", org_id);
+  console.log("gpustatuss",gpu_status);
   if (user_id === null && image_id === null) {
     throw 'Error adding data to the database ERROR: User or Docker Image Not Found';
   }
@@ -22,7 +24,7 @@ console.log("gpustatuss",gpu_status);
 
         if (!existingRecord) {
           const query =
-            'INSERT INTO system_specs (gpu_name, gpu_free, gpu_used, gpu_total, ram_free, ram_used, cpu_name, user_id, image_id, gpu_status, gpu_index) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id';
+            'INSERT INTO system_specs (gpu_name, gpu_free, gpu_used, gpu_total, ram_free, ram_used, cpu_name, user_id, image_id, gpu_status, gpu_index,org_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id';
 
           const values = [
             gpuData ? gpuData.name : null,
@@ -35,7 +37,8 @@ console.log("gpustatuss",gpu_status);
             user_id ? user_id : null,
             image_id ? image_id : null,
             gpu_status ? gpu_status : null,
-            gpuData ? gpuData.index : null
+            gpuData ? gpuData.index : null,
+            org_id ? org_id : null
           ];
 
           try {

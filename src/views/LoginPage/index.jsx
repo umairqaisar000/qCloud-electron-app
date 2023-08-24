@@ -105,7 +105,9 @@ const LoginPage = () => {
             console.log('User authenticated')
             //   setIsAuthenticated(true)
             //   localStorage.setItem('userData', email);
-            login(result.rows[0].id, result.rows[0].email)
+            login(result.rows[0].id,
+              result.rows[0].email,
+              result.rows[0].org_id)
             navigate('/homepage')
           } else {
             console.log('Invalid email or password')

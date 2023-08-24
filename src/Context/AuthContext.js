@@ -9,10 +9,10 @@ export const AuthProvider = ({ children }) => {
   const [isLend, setIsLend] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const login = (id, email) => {
+  const login = (id, email,org_id) => {
     setIsAuthenticated(true)
     localStorage.setItem('isAuthenticated', true)
-    localStorage.setItem('userData', JSON.stringify({ id, email }))
+    localStorage.setItem('userData', JSON.stringify({ id, email ,org_id}))
   }
 
   const lend = (lend) => {
