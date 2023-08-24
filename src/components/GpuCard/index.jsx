@@ -130,7 +130,7 @@ const GpuCard= ({
           `docker images -q ${IMAGE_NAME}`
         )
         const user_id = JSON.parse(localStorage.getItem('userData')).id
-  
+        console.log("System-Specs:",systemSpecs);
         await addGpuData(systemSpecs, user_id, image_id);
       } catch (error) {
         console.error('Error adding GPU data to the database', error);

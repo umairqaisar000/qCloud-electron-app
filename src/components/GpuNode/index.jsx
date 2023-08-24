@@ -38,8 +38,8 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
         const image_id = await execShellCommand(
           `docker images -q ${IMAGE_NAME}`
         )
-        
-        console.log(user_id, image_id)
+        console.log("system Specs");
+        console.log("userId and imageId ",user_id, image_id)
         await addGpuData(systemSpecs, user_id, image_id,gpu_status);
         setShowSuccessMessage(true)
         setIsLend(true)

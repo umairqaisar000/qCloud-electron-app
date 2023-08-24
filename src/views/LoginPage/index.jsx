@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import './style.scss'
 import * as Yup from 'yup'
 import { AuthNavBar,InputField} from 'qlu-20-ui-library'
+const config = require('../../utils/config')
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -121,6 +122,34 @@ const LoginPage = () => {
     }
   }
 
+  const LoginHandler = async (email, password) => {
+    try {
+      const response = await fetch(config.apiUrl + '/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      }).then(response => response.json())
+      console.log(response)
+      if (response.success === true) {
+        console.log('Resonse-user', response.user)
+        // dispatch(setUserData(response.user));
+        localStorage.setItem('userData', JSON.stringify(response.user))
+        console.log('User-Data', response.user)
+        localStorage.setItem('xhqr', JSON.stringify(response.user?.xhqr))
+        navigate('/homepage')
+
+        //  setVerificationStatus(true);
+      } else {
+        console.log("Error");
+      }
+    } catch (error) {
+      console.error('Error login:', error)
+    }
+  }
+
+
   return (
     <div className="login-page">
       <div className="top_nav_bar">
@@ -162,7 +191,7 @@ const LoginPage = () => {
           <button
             type="submit"
             className="primaryButton"
-            onClick={handleLogin}
+            onClick={() => LoginHandler(email,password)}
           >
             Login
           </button>
