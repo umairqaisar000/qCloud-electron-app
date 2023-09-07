@@ -8,7 +8,6 @@ import HomePage from './views/HomePage';
 function App() {
   return (
     <HashRouter>
-      
         <AuthProvider>
           <Routes>
             <Route path="/" exact element={<LoginPage />} />
@@ -16,7 +15,6 @@ function App() {
             <Route path="/homepage" exact element={<HomePage />} />
           </Routes>
         </AuthProvider>
-     
     </HashRouter>
   )
 }

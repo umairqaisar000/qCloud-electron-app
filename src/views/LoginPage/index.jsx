@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import './style.scss'
 import * as Yup from 'yup'
-import { AuthNavBar,InputField} from 'qlu-20-ui-library'
+import { AuthNavBar,InputField, Loader} from 'qlu-20-ui-library'
 const config = require('../../utils/config')
 
 const validationSchema = Yup.object().shape({
@@ -32,6 +32,7 @@ const LoginPage = () => {
   const { login } = useContext(AuthContext)
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = e => {
     const { name, value } = e.target
@@ -123,31 +124,42 @@ const LoginPage = () => {
   }
 
   const LoginHandler = async (email, password) => {
+    setLoading(true);
+    setEmailError('');
+    setPasswordError('');
+
     try {
+      await validationSchema.validate({ email, password }, { abortEarly: false });
+
       const response = await fetch(config.apiUrl + '/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password })
-      }).then(response => response.json())
-      console.log(response)
-      if (response.success === true) {
-        console.log('Resonse-user', response.user)
-        // dispatch(setUserData(response.user));
-        localStorage.setItem('userData', JSON.stringify(response.user))
-        console.log('User-Data', response.user)
-        localStorage.setItem('xhqr', JSON.stringify(response.user?.xhqr))
-        navigate('/homepage')
+        body: JSON.stringify({ email, password }),
+      }).then((response) => response.json());
 
-        //  setVerificationStatus(true);
+      if (response.success === true) {
+        localStorage.setItem('userData', JSON.stringify(response.user));
+        localStorage.setItem('xhqr', JSON.stringify(response.user?.xhqr));
+        navigate('/homepage');
       } else {
-        console.log("Error");
+        toast.error('Incorrect email or password. Please re-enter.');
       }
-    } catch (error) {
-      console.error('Error login:', error)
+    } catch (validationError) {
+      // Handle Yup validation errors
+      validationError.inner.forEach((error) => {
+        if (error.path === 'email') {
+          setEmailError(error.message);
+        } else if (error.path === 'password') {
+          setPasswordError(error.message);
+        }
+        toast.error(error.message);
+      });
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
 
   return (
@@ -192,54 +204,17 @@ const LoginPage = () => {
             type="submit"
             className="primaryButton"
             onClick={() => LoginHandler(email,password)}
+            disabled={loading}
           >
-            Login
+           {loading ? <Loader/> : 'Login'}
           </button>
         </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
 
-    // <div className="login-container">
-    //    <ToastContainer />
-    //   <form className="login-form">
-    //     <h2 className="login-heading">Login</h2>
-    //     <div className="form-group">
-    //       <label htmlFor="email" className="login-label">
-    //         Email
-    //       </label>
-    //       <input
-    //         type="email"
-    //         name="email"
-    //         className="login-input"
-    //         id="email"
-    //         value={email}
-    //         onChange={handleInputChange}
-    //         placeholder="Enter your email"
-    //       />
-    //     </div>
-    //     <div className="form-group">
-    //       <label htmlFor="password" className="login-label">
-    //         Password
-    //       </label>
-    //       <input
-    //         type="password"
-    //         className="login-input"
-    //         name="password"
-    //         id="password"
-    //         value={password}
-    //         onChange={handleInputChange}
-    //         placeholder="Enter your password"
-    //       />
-    //     </div>
-    //     <button type="button" className="login-button" onClick={handleLogin}>
-    //       Login
-    //     </button>
-    //     <a href="./Signup" className="signup-link">
-    //       Don't have an account? Sign up
-    //     </a>
-    //   </form>
-    // </div>
+   
   )
 }
 

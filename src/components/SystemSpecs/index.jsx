@@ -25,6 +25,7 @@ useEffect(() => {
         }
 
         const specs = await getSystemSpecs();
+        console.log("Specsssssss:", specs);
         setSystemSpecs(specs);
         console.log('Specs: ' , systemSpecs);
     } catch (error) {

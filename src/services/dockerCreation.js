@@ -1,5 +1,6 @@
 const Docker = window.require('dockerode')
 const { exec } = window.require('child_process')
+const path = require('path');
 
 const docker = new Docker()
 
@@ -17,11 +18,14 @@ const execShellCommand = cmd => {
 
 export async function createAndStartDocker(imageName, container_image_name) {
   const PORT = 2222
-
+  const currentDir = __dirname;
+  console.log("current_directory:", currentDir);
+  const dockerfilePath = path.join(currentDir, 'src', 'server', 'Dockerfile');
+  console.log("dockerfilePath:", dockerfilePath);
   console.log('Creating Docker image...')
   try {
     await execShellCommand(
-      `docker build --rm -t ${imageName} -f /home/shireen/Desktop/qcloud1.0/qCloud-electron-app/src/server/Dockerfile .`
+      `docker build --rm -t ${imageName} -f ${dockerfilePath}  .`
     )
   } catch (error) {
     console.error('Error Creating Docker image:', error)

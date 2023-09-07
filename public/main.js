@@ -25,6 +25,7 @@ function createWindow() {
       ? 'http://localhost:3000'
       : `file://${path.join(__dirname, '../build/index.html')}`
   )
+  
 
   win.on('close', event => {
     event.preventDefault()
@@ -67,6 +68,7 @@ app.on('ready', () => {
     win.isVisible() ? win.hide() : win.show()
   })
 })
+
 
 // app.on('before-quit', () => {
 //   tray.destroy();

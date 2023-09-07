@@ -54,7 +54,7 @@
   "build": {
     "extends": null,
     "appId": "com.electron.myapp",
-    "productName": "QCloud",
+    "productName": "QCloud-Test",
     "files": [
       "dist/**/*",
       "build/**/*",
@@ -62,7 +62,7 @@
       "package.json"
     ],
     "extraResources": [
-      "./extraResources/**"
+      "/snap/bin/ngrok"
     ],
     "directories": {
       "buildResources": "assets"
@@ -71,13 +71,30 @@
       "target": "dmg"
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64", 
+            "ia32"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
     },
     "linux": {
       "target": "deb",
       "category": "Development",
       "icon": "build/logo.png"
     }
+
+
   },
   "eslintConfig": {
     "extends": [

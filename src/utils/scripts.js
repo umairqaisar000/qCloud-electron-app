@@ -10,7 +10,7 @@ export const getSystemSpecs = async () => {
       getCPUUsage(),
       getRAMUsage()
     ])
-
+    console.log('Ram Memory Information:', ramMemoryInfo);
     return {
       gpu: gpuMemoryInfo,
       cpu: `${cpuUsageInfo}%`,
@@ -44,6 +44,7 @@ const getGPUMemoryInfo = () => {
       const gpuInfoList = []
 
       for (const gpuInfo of memoryInfo) {
+        console.log("Gpu info:", gpuInfo);
         const [index, name, free, used, total] = gpuInfo.split(', ')
         gpuInfoList.push({
           index: parseInt(index), // Parse GPU index
@@ -62,7 +63,7 @@ const getGPUMemoryInfo = () => {
 }
 const getCPUUsage = () => {
   const cpus = os.cpus()
-
+ console.log("Cpus available:",cpus);
   let idleMs = 0
   let totalMs = 0
 
@@ -72,6 +73,7 @@ const getCPUUsage = () => {
     }
 
     idleMs += cpu.times.idle
+
   }
 
   const percentage = (1 - idleMs / totalMs) * 100
@@ -82,9 +84,13 @@ const getRAMUsage = () => {
   return si
     .mem()
     .then(ram => {
-      const ramUsage = ram.used / 1024 ** 2 // Convert to MB
-      const ramFree = ram.available / 1024 ** 2
-      const ramTotal = ram.total / 1024 ** 2
+      console.log("RAM usage:",ram)
+      const ramUsage = ram.used / 1024 ** 3 // Convert to MB
+      console.log("used RAM: ",ramUsage);
+      const ramFree = ram.free / 1024 ** 3
+      console.log("free RAM: " + ramFree);
+      const ramTotal = ram.total / 1024 ** 3
+      console.log("total RAM: " + ramTotal);
       return {
         free: parseInt(ramFree),
         used: parseInt(ramUsage),
@@ -103,7 +109,9 @@ export const getNgrokUrl = async () => {
     proto: 'tcp',
     addr: 2222,
     authtoken: '2SkN5WEvYetwQVt4gLkqiQ5S0Av_4Ly9WjG4inH7wa6F1jvMq',
-    region: 'us'
+    region: 'us',
+    binPath: path => path.replace('app.asar', 'app.asar.unpacked'),
   })
+  
   return url
 }
