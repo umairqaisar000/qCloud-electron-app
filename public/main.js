@@ -1,11 +1,40 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron')
+const { app, BrowserWindow, Tray, Menu, dialog } = require('electron')
 const path = require('path')
 const isDev = require('electron-is-dev')
+const { exec } = require('child_process');
 
 let tray
 let win
 
 require('@electron/remote/main').initialize()
+
+
+function performPreInstallationChecks() {
+  // Check if Docker is installed
+  exec('docker --version', (dockerError, dockerStdout, dockerStderr) => {
+    if (dockerError) {
+      // Docker is not installed
+      dialog.showErrorBox(
+        'Missing Dependency',
+        'Docker is not installed. Please follow these instructions to install it:\n\n1. Go to https://www.docker.com/get-started and download Docker.\n2. Install Docker by following the installation instructions for your platform.\n3. Once Docker is installed, restart this app.'
+      );
+    } else {
+      // Docker is installed, check for ngrok or other dependencies
+      exec('ngrok --version', (ngrokError, ngrokStdout, ngrokStderr) => {
+        if (ngrokError) {
+          // ngrok is not installed
+          dialog.showErrorBox(
+            'Missing Dependency',
+            'ngrok is not installed. Please follow these instructions to install it:\n\n1. Go to https://ngrok.com/download and download ngrok for your platform.\n2. Install ngrok by following the installation instructions.\n3. Once ngrok is installed, restart this app.'
+          );
+        } else {
+          // Both dependencies are installed, create the main window
+          createWindow();
+        }
+      });
+    }
+  });
+}
 
 function createWindow() {
   // Create the browser window.
@@ -34,7 +63,7 @@ function createWindow() {
 }
 
 app.on('ready', () => {
-  createWindow()
+  performPreInstallationChecks();
   tray = new Tray(path.join(__dirname, '/cloud-computing.png'))
 
   const contextMenu = Menu.buildFromTemplate([

@@ -10,7 +10,8 @@ import {
 import { removeSshCredientials } from '../../database/sshData'
 import {
   createAndStartDocker,
-  stopAndDeleteContainer
+  stopAndDeleteContainer,
+  stopContainer
 } from '../../services/dockerCreation'
 import { execShellCommand } from '../../utils/scripts'
 import { SecondaryButton, Loader } from 'qlu-20-ui-library'
@@ -37,10 +38,15 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
       const gpu_status = 'active';
       const gpu_index = systemSpecs['gpu'][0].index;
       const user_id = JSON.parse(localStorage.getItem('userData')).id;
+      console.log('SystemSpecsAll', systemSpecs['gpu']);
       console.log('SystemSpecs', systemSpecs['gpu'][0].index);
-
+      console.log('Container Image Name', CONTAINER_IMAGE_NAME);
+      console.log("Running? or not?:",isRunning);
       const existingRecord = await checkExistingRecord(user_id, gpu_index)
+      console.log("Existing Record?", existingRecord);
+      
       if (!existingRecord) {
+        console.log("Here to create the Docker Container Image");
         if (systemSpecs) {
           await createAndStartDocker(IMAGE_NAME, CONTAINER_IMAGE_NAME)
           const image_id = await execShellCommand(
@@ -70,7 +76,8 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
     try {
       //  await removeSshCredientials()
       //  await removeGpuData()
-      //  await stopAndDeleteContainer(IMAGE_NAME)
+    //  await stopContainer(IMAGE_NAME);
+ //      await stopAndDeleteContainer(IMAGE_NAME)
       //  await ngrok.disconnect()
       const user_id = JSON.parse(localStorage.getItem('userData')).id
       await updateGpuStatus(user_id, 'inactive')

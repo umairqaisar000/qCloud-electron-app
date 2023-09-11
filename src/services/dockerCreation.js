@@ -80,6 +80,59 @@ export async function stopAndDeleteContainer(imageName) {
   });
 }
 
+export async function stopContainer(imageName) {
+  // Stop the container
+  const stopCommand = `docker stop ${imageName}`;
+  exec(stopCommand, (stopError, stopStdout, stopStderr) => {
+    if (stopError) {
+      console.error(`Error stopping the container: ${imageName}`);
+      console.error(stopStderr);
+    } else {
+      console.log(`Container ${imageName} stopped successfully.`);
+    }
+  });
+}
+
+export async function containerExistsWithName(containerName) {
+  try {
+    const { stdout, stderr } = await execShellCommand(`docker ps -a --filter "name=${containerName}" --format "{{.ID}}"`);
+  //  const containerId = stdout.toString().trim(); // Convert stdout to string and trim whitespace
+    console.log("Containerr Exists Container ID: " ,stdout);
+    return stdout !== undefined; // If there is any output, the container exists
+  } catch (error) {
+    console.error(`Error checking container existence: ${error.message}`);
+    return false; // Handle the error appropriately
+  }
+}
+
+export async function isContainerRunning(containerName) {
+  try {
+    // Use docker inspect to get detailed information about the container
+    const { stdout, stderr } = await exec(`docker inspect --format="{{.State.Status}}" ${containerName}`);
+    const containerStatus = stdout.toString().trim();
+
+    if (containerStatus.toLowerCase() === "running") {
+      console.log("Container Status: " + containerStatus);
+      return true;
+    } else {
+      console.log("Container Status: " + containerStatus);
+      return false;
+    }
+  } catch (error) {
+    console.error(`Error checking container status: ${error.message}`);
+    return false; // Handle the error appropriately
+  }
+}
+
+export async function startContainer(containerName) {
+  try {
+    await exec(`docker start ${containerName}`);
+    console.log(`Container ${containerName} started successfully.`);
+  } catch (error) {
+    console.error(`Error starting container: ${error.message}`);
+    // Handle the error appropriately
+  }
+}
 
 
 
