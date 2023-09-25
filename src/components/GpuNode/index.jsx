@@ -66,7 +66,8 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
       }
       setIsLendLoading(false)
     } catch (err) {
-      setErrorMessage('Lending failed. Please try again. Error: ' + err.message)
+      setIsLendLoading(false)
+      setErrorMessage('Lending failed. Please try again. Error: ' + err)
       setTimeout(() => setErrorMessage(err), 5000) // Clear error message after 5 seconds
       console.log(err)
     }

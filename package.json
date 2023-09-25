@@ -59,8 +59,12 @@
       "dist/**/*",
       "build/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "src/server/**/*"
     ],
+    
+    "afterPack": "src/utils/afterScript.js",
+
     "extraResources": [
       "/snap/bin/ngrok"
     ],
@@ -92,9 +96,11 @@
       "target": "deb",
       "category": "Development",
       "icon": "build/logo.png"
-    }
-
-
+    },
+    "asar": true,
+    "asarUnpack": [
+      "src/server/**/*"
+    ]
   },
   "eslintConfig": {
     "extends": [

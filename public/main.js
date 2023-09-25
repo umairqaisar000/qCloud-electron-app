@@ -60,6 +60,12 @@ function createWindow() {
     event.preventDefault()
     win.hide()
   })
+
+  win.webContents.on("devtools-opened", () => {
+    console.log("DevTools opened!");
+  });
+
+  win.webContents.openDevTools();
 }
 
 app.on('ready', () => {
