@@ -3,64 +3,86 @@ import { v4 as uuidv4 } from 'uuid'
 import { Alert } from 'react-bootstrap'
 import {
   addGpuData,
-  removeGpuData,
   updateGpuStatus,
   checkExistingRecord
 } from '../../database/GpuData'
-import { removeSshCredientials } from '../../database/sshData'
+//import { removeSshCredientials } from '../../database/sshData'
 import {
   createAndStartDocker,
-  stopAndDeleteContainer,
+  startDockerContainer,
   stopContainer
 } from '../../services/dockerCreation'
-import { execShellCommand } from '../../utils/scripts'
+import { getContainerNameFromDb } from '../../database/sshData'
+import { execShellCommand,getCpuID,getMacAddress } from '../../utils/scripts'
 import { SecondaryButton, Loader } from 'qlu-20-ui-library'
 import './style.scss'
+// const Redis = require('ioredis')
 
-const ngrok = window.require('ngrok')
+//const ngrok = window.require('ngrok')
 
+let containerName
+// let storedContainerName
+// // let imageName;
+// let client
 const ID = uuidv4()
 
 const IMAGE_NAME = `client_dk_${ID}`
-const CONTAINER_IMAGE_NAME = `client_dk_container_${ID}`
+const CONTAINER_IMAGE_NAME = `client_dk_${ID}`
 
 const GpuNode = ({ systemSpecs, isRunning }) => {
   const [errorMessage, setErrorMessage] = useState('')
   const [isLend, setIsLend] = useState(isRunning)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [isLendLoading, setIsLendLoading] = useState(false)
-
+ 
   console.log('Running????', isRunning)
 
   const handleLend = async () => {
     try {
+      const macAddress = await getMacAddress();
+      const cpuId= await getCpuID();
+      console.log("MacAddress in GpuNode", macAddress);
+      console.log("Cpu id  in GpuNode", cpuId);
       setIsLendLoading(true)
-      const gpu_status = 'active';
-      const gpu_index = systemSpecs['gpu'][0].index;
-      const user_id = JSON.parse(localStorage.getItem('userData')).id;
-      console.log('SystemSpecsAll', systemSpecs['gpu']);
-      console.log('SystemSpecs', systemSpecs['gpu'][0].index);
-      console.log('Container Image Name', CONTAINER_IMAGE_NAME);
-      console.log("Running? or not?:",isRunning);
-      const existingRecord = await checkExistingRecord(user_id, gpu_index)
-      console.log("Existing Record?", existingRecord);
-      
-      if (!existingRecord) {
-        console.log("Here to create the Docker Container Image");
+      const gpu_status = 'active'
+      const gpu_index = systemSpecs['gpu'][0].index
+      const user_id = JSON.parse(localStorage.getItem('userData')).id
+      console.log('SystemSpecsAll', systemSpecs['gpu'])
+      console.log('SystemSpecs Index', systemSpecs['gpu'][0].index)
+      console.log('Container Image Name', CONTAINER_IMAGE_NAME)
+      console.log('Running? or not?:', isRunning)
+      const existingRecord = await checkExistingRecord(macAddress,cpuId,gpu_index,user_id)
+      console.log('Existing Record?', existingRecord)
+
+      containerName = CONTAINER_IMAGE_NAME
+      // imageName=IMAGE_NAME;
+      // Create a Redis client with the specified configuration
+
+      if (existingRecord==='false') {
+        console.log('Here to create the Docker Container Image')
         if (systemSpecs) {
-          await createAndStartDocker(IMAGE_NAME, CONTAINER_IMAGE_NAME)
+          console.log('container Name:', containerName)
+          await createAndStartDocker(IMAGE_NAME, containerName)
           const image_id = await execShellCommand(
             `docker images -q ${IMAGE_NAME}`
           )
-          console.log('system Specs',systemSpecs)
+          console.log('system Specs', systemSpecs)
           console.log('userId and imageId ', user_id, image_id)
-          await addGpuData(systemSpecs, user_id, image_id, gpu_status)
+          console.log('gpu_status in handleLend:',gpu_status);
+          await addGpuData(systemSpecs, user_id, image_id, gpu_status, containerName)
+          console.log('Gpu Data added...in GpuNode')
           setShowSuccessMessage(true)
           setIsLend(true)
           setTimeout(() => setShowSuccessMessage(false), 5000)
         }
       } else {
-        await updateGpuStatus(user_id, gpu_status)
+        console.log('in elseeeeee')
+        await updateGpuStatus(user_id,macAddress,cpuId,gpu_status)
+
+        const storedContainerName = await getContainerNameFromDb(macAddress,cpuId)
+        console.log('Container name retrieved from Db:', storedContainerName)
+
+        await startDockerContainer(storedContainerName)
         setShowSuccessMessage(true)
         setIsLend(true)
       }
@@ -75,20 +97,31 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
 
   const handleWithdraw = async () => {
     try {
+      const macAddress = await getMacAddress();
+      const cpuId= await getCpuID();
+      console.log("MacAddress in GpuNode", macAddress);
+      console.log("Cpu id  in GpuNode", cpuId);
+      setIsLendLoading(true);
+      const storedContainerName = await getContainerNameFromDb(macAddress,cpuId);
+      console.log('Container Stored Image Name', storedContainerName)
+      const containerStopped = await stopContainer(storedContainerName)
+      console.log('Container Stopped?', containerStopped)
       //  await removeSshCredientials()
       //  await removeGpuData()
-    //  await stopContainer(IMAGE_NAME);
- //      await stopAndDeleteContainer(IMAGE_NAME)
+      //  await stopContainer(IMAGE_NAME);
+      //  await stopAndDeleteContainer(IMAGE_NAME)
       //  await ngrok.disconnect()
       const user_id = JSON.parse(localStorage.getItem('userData')).id
-      await updateGpuStatus(user_id, 'inactive')
+      await updateGpuStatus(user_id,macAddress,cpuId, 'inactive')
       setIsLend(false)
+      setIsLendLoading(false)
     } catch (err) {
+      setIsLendLoading(false)
       setErrorMessage(
         'Withdrawal failed. Please try again. Error: ' + err.message
       )
-      setTimeout(() => setErrorMessage(err), 5000); // Clear error message after 5 seconds
-      console.log(err);
+      setTimeout(() => setErrorMessage(err), 5000) // Clear error message after 5 seconds
+      console.log(err)
     }
   }
 
@@ -114,7 +147,6 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
           {errorMessage}
         </Alert>
       )}
-
       {/* Display GPU and system info in the card-container */}
       {systemSpecs['gpu'] !== undefined ? (
         systemSpecs['gpu']?.length >= 0 &&
@@ -369,9 +401,9 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
               </div>
               <div className="info">
                 <span className="name">RAM</span>
-                <span className="value">{`${(
-                  (systemSpecs['ram'].total)
-                ).toFixed(2)} GB`}</span>
+                <span className="value">{`${systemSpecs['ram'].total.toFixed(
+                  2
+                )} GB`}</span>
               </div>
               <div className="info">
                 <span className="name">CPU USAGE</span>
@@ -379,14 +411,19 @@ const GpuNode = ({ systemSpecs, isRunning }) => {
               </div>
             </div>
             <div className="button">
+              {console.log("isLendLoading....:",isLendLoading)}
               {!isLend ? (
                 <SecondaryButton
                   text={isLendLoading ? <Loader /> : 'Lend GPU'} // Conditional rendering
                   onClick={handleLend}
-                  disabled={isLendLoading} // Disable button while loading
+                  isDisabled={isLendLoading} // Disable button while loading
                 />
               ) : (
-                <SecondaryButton text="Stop Lending" onClick={handleWithdraw} />
+                <SecondaryButton
+                  text={isLendLoading ? <Loader /> : 'Stop Lending'} // Conditional rendering
+                  onClick={handleWithdraw}
+                  isDisabled={isLendLoading} // Disable button while loading
+                />
               )}
             </div>
           </div>

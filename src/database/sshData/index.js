@@ -23,7 +23,7 @@ const config = require('../../utils/config')
 //     throw ('Error inserting data into the docker ssh table:', error)
 //   } 
 // }
- export const addSshCredientials = async () => {
+ export const addSshCredientials = async (containerName) => {
   const spec_id = uuidv4();
   const docker_url = await getNgrokUrl();
   const system_specs_id = localStorage.getItem('current_job_id');
@@ -34,6 +34,7 @@ const config = require('../../utils/config')
     port: 2222,
     name: 'root',
     system_specs_id,
+    containerName
   };
 
   try {
@@ -72,7 +73,7 @@ export async function removeSshCredientials() {
 
 export async function removeSshCredentials() {
   const system_specs_id = localStorage.getItem('current_job_id');
-
+  
   try {
     const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}')
     const response = await fetch(`${config.apiUrl}/docker_ssh/removeSshCredentials`, {
@@ -93,3 +94,36 @@ export async function removeSshCredentials() {
     console.error('Error:', error);
   }
 }
+
+export const getContainerNameFromDb = async (macAddress,cpuId) => {
+  try {
+    const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}');
+    const data = {macAddress,cpuId}; 
+    console.log("The Data in getContainerNameFromDb: ",macAddress,cpuId);
+    const response = await fetch(`${config.apiUrl}/docker_ssh/getContainerName`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      body: JSON.stringify(data), 
+    });
+
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log("Response Data: " + responseData);
+      if (responseData && responseData.containerName) {
+        return responseData.containerName;
+      } else {
+        console.error('Container name not found in the response.');
+        return null;
+      }
+    } else {
+      console.error('Failed to fetch container name.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+};

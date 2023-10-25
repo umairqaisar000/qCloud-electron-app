@@ -4,6 +4,7 @@ import SystemSpecs from '../../components/SystemSpecs'
 import { AuthContext } from '../../Context/AuthContext'
 import { removeGpuData,updateGpuStatus } from '../../database/GpuData'
 import { removeSshCredientials } from '../../database/sshData'
+import { execShellCommand,getCpuID,getMacAddress } from '../../utils/scripts'
 import TopBar from '../../components/TopBar'
 import { SecondaryButton } from 'qlu-20-ui-library'
 import './style.scss'
@@ -30,12 +31,15 @@ const HomePage = () => {
   // }
 
   const handleLogout = async () => {
-    
+      const macAddress = await getMacAddress();
+      const cpuId= await getCpuID();
+      console.log("MacAddress in GpuNode", macAddress);
+      console.log("Cpu id  in GpuNode", cpuId);
     // removeSshCredientials()
     // removeGpuData()
         const user_id = JSON.parse(localStorage.getItem('userData')).id
         console.log("User_idddddddd",user_id);
-        await updateGpuStatus(user_id, 'disconnected'); // Update gpu_status to 'active'
+        await updateGpuStatus(user_id,macAddress,cpuId,'disconnected'); // Update gpu_status to 'active'
       
         logout()
     ngrok.disconnect()

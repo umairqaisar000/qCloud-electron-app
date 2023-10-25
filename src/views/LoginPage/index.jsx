@@ -1,3 +1,4 @@
+
 import React, { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../../Context/AuthContext'
@@ -7,8 +8,29 @@ import 'react-toastify/dist/ReactToastify.css'
 import './style.scss'
 import * as Yup from 'yup'
 import { AuthNavBar,InputField, Loader} from 'qlu-20-ui-library'
+import { addNgrokToken } from '../../database/membersData'
+const { dialog } = window.require('electron').remote;
+const prompt = window.require('electron-prompt');
+const { exec } = window.require('child_process')
+
+//const { addNgrokToken } = require('../../database/membersData');
+
+// const { ipcRenderer } = window.require('electron');
+
+let user_id;
 const config = require('../../utils/config')
 
+const execShellCommand = cmd => {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(stdout || stderr)
+      }
+    })
+  })
+}
 const validationSchema = Yup.object().shape({
   email: Yup.string()
     .min(8, 'email must be at least 8 characters long')
@@ -34,99 +56,20 @@ const LoginPage = () => {
   const [passwordError, setPasswordError] = useState('')
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = e => {
-    const { name, value } = e.target
-    // setErrors(prevErrors => ({ ...prevErrors, [name]: '' }))
-    if (name === 'email') {
-      setEmail(value)
-    } else if (name === 'password') {
-      setPassword(value)
-    }
-  }
-
-  const handleLogin = async () => {
-    setEmailError('')
-    setPasswordError('')
-  
-    if (!email && !password) {
-      setEmailError('Email is required')
-
-      setPasswordError('Password is required')
-      return
-    }
-    if (!email) {
-      setEmailError('Email is required')
-      return
-    }
-
-    // if (!isEmailValid(email)) {
-    //   setEmailError("Invalid email format");
-    //   return;
-    // }
-
-    if (!password) {
-      setPasswordError('Password is required')
-      return
-    }
-    try {
-      const isValid = await validationSchema.isValid({ email, password })
-      if (!isValid) {
-        try {
-          await validationSchema.validate(
-            { email, password },
-            { abortEarly: false }
-          )
-        } catch (validationErrors) {
-          const validationErrorsMap = validationErrors.inner.reduce(
-            (acc, error) => {
-              acc[error.path] = error.message
-              return acc
-            },
-            {}
-          )
-          // setErrors(prevErrors => ({ ...prevErrors, ...validationErrorsMap }))
-
-          Object.values(validationErrorsMap).forEach(errorMsg => {
-            toast.error(errorMsg)
-          })
-        }
-        return
-      } else {
-        const client = await pool.connect()
-        const bcrypt = window.require('bcrypt')
-        const query = 'SELECT * FROM members WHERE email = $1'
-        const result = await client.query(query, [email])
-
-        if (result.rowCount === 1) {
-          const storedPassword = result.rows[0].password // Assuming the password column is named "password" in the database
-          console.log('storedPassword:', storedPassword)
-          // Compare the stored password with the entered password
-          const passwordMatch = await bcrypt.compare(password, storedPassword)
-
-          if (passwordMatch) {
-            console.log('User authenticated')
-            //   setIsAuthenticated(true)
-            //   localStorage.setItem('userData', email);
-            login(result.rows[0].id,
-              result.rows[0].email,
-              result.rows[0].org_id)
-            navigate('/homepage')
-          } else {
-            console.log('Invalid email or password')
-          }
-
-          client.release()
-        }
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  let options = {
+      title: 'Enter Ngrok Auth Token',
+      label: 'AuthToken:',
+      value: '',
+      inputAttrs: { type: 'text' },
+      type: 'input'
+};
+let userInputToken;
 
   const LoginHandler = async (email, password) => {
     setLoading(true);
     setEmailError('');
     setPasswordError('');
+    // const authToken = await ipcRenderer.invoke('get-ngrok-auth-token');
 
     try {
       await validationSchema.validate({ email, password }, { abortEarly: false });
@@ -140,9 +83,39 @@ const LoginPage = () => {
       }).then((response) => response.json());
 
       if (response.success === true) {
+        console.log("Login User Response:",response.user);
+        user_id=response.user.id;
         localStorage.setItem('userData', JSON.stringify(response.user));
+        console.log("Xhqr token:",response.user.xhqr);
         localStorage.setItem('xhqr', JSON.stringify(response.user?.xhqr));
+        const userData = JSON.parse(localStorage.getItem('userData'));
+        console.log("user data from localStorage:",userData);
+        if (userData && userData.ngrok_token === null) { 
+          console.log("here to ask for token");
+         await prompt(options).then(r => {
+              if (r !== null && r.trim() !== "") {
+                console.log("rrrrr111",r);
+                userInputToken = r;
+                console.log("user input token:",userInputToken);
+              } else {
+                console.log("rrrrr222",r);
+                toast.error('Please Enter Authtoken to Proceed');
+              }
+            })
+        
+          console.log("here to ask for token2");
+          if (userInputToken) {
+              userData.ngrok_token = userInputToken; // Update the ngrok_token in userData object
+              console.log("Token Input by user:",userData.ngrok_token);
+              localStorage.setItem('userData', JSON.stringify(userData));  // Store the updated userData back to localStorage
+              await addNgrokToken(user_id, userInputToken);
+              navigate('/homepage'); 
+          }
+      } else if (userData && userData.ngrok_token) {
+        console.log("navigating to homepage....")
         navigate('/homepage');
+      }
+        
       } else {
         toast.error('Incorrect email or password. Please re-enter.');
       }
@@ -161,8 +134,7 @@ const LoginPage = () => {
     }
   };
 
-
-  return (
+return (
     <div className="login-page">
       <div className="top_nav_bar">
         <AuthNavBar

@@ -8,76 +8,75 @@ export const addGpuData = async (
   systemSpecs,
   user_id,
   image_id,
-  gpu_status
+  gpu_status,
+  containerName
 ) => {
   try {
-    console.log('In the gpuNode')
+    console.log('in Add gpu data')
+    console.log('Image ID in add gpu data: ' + image_id)
+    console.log('User ID in add gpu data:' + user_id)
+    console.log('System specs in add gpu data:' + systemSpecs)
+    console.log('gpu status in add gpu data: ' + gpu_status)
+    console.log('container name in add gpu data:' + containerName)
+
     const org_id = JSON.parse(localStorage.getItem('userData')).org_id
 
     const gpuDataList = systemSpecs['gpu']
     const ramData = systemSpecs['ram']
     const cpuData = systemSpecs['cpu']
+    const macAddress = systemSpecs['mac']
+    const cpuSerialId = systemSpecs['cpuId']
+
+    console.log('gpuDataList in add gpu data: ' + gpuDataList)
+    console.log('ramData in add gpu data:' + ramData)
+    console.log('cpuData in add gpu data:' + cpuData)
+    console.log('macAddress in add gpu data: ' + macAddress)
+    console.log('cpuSerialId in add gpu data:' + cpuSerialId)
 
     if (user_id === null && image_id === null) {
       throw 'Error adding data to the database ERROR: User or Docker Image Not Found'
     }
 
-    const insertedIds = await Promise.all(
-      gpuDataList.map(async gpuData => {
-        const existingRecord = await checkExistingRecord(user_id, gpuData.index)
-        console.log('Existing Record: ' + existingRecord)
-        if (!existingRecord) {
-          const requestBody = {
-            gpuData: gpuData ? gpuData.name : null,
-            gpuFree: gpuData ? gpuData.free : null,
-            gpuUsed: gpuData ? gpuData.used : null,
-            gpuTotal: gpuData ? gpuData.total : null,
-            ramFree: ramData ? ramData.free : null,
-            ramUsed: ramData ? ramData.used : null,
-            cpuData: cpuData ? cpuData : null,
-            user_id: user_id ? user_id : null,
-            image_id: image_id ? image_id : null,
-            gpu_status: gpu_status ? gpu_status : null,
-            gpu_index: gpuData ? gpuData.index : null,
-            org_id: org_id ? org_id : null
-          }
+    console.log('MacAddress in add gpu data', macAddress)
+    console.log('Cpu id  in add gpu data', cpuSerialId)
 
-          try {
-            const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}')
-            const response = await fetch(
-              `${config.apiUrl}/system_specs/addSystemSpecs`,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: token
-                },
-                body: JSON.stringify(requestBody)
-              }
-            ).then(response => response.json())
+    const insertedIds = []
 
-            console.log('Inserted data with ID:', response.request[0].id)
-            const insertedId = response.request[0].id;
-            localStorage.setItem('current_job_id', insertedId);
-            return response.id
-          } catch (err) {
-            console.error('Error adding data via fetch', err)
-            throw err
-          }
-        } else {
-          const validInsertedIds = insertedIds.filter(id => id !== null)
-          // localStorage.setItem('current_job_id', validInsertedIds)
-          console.log(
-            'Data for GPU index',
-            gpuData.index,
-            'already exists. Skipping insertion.'
-          )
-          return null
-        }
-      })
+    const gpuData = gpuDataList[0]
+    // for (const gpuData of gpuDataList) {
+    console.log(
+      'userID and gpuData.index in add gpu data: ' + user_id,
+      gpuData.index
     )
+    const requestBody = {
+      gpuData: gpuData ? gpuData.name : null,
+      gpuFree: gpuData ? gpuData.free : null,
+      gpuUsed: gpuData ? gpuData.used : null,
+      gpuTotal: gpuData ? gpuData.total : null,
+      ramFree: ramData ? ramData.free : null,
+      ramUsed: ramData ? ramData.used : null,
+      cpuData: cpuData ? cpuData : null,
+      user_id: user_id ? user_id : null,
+      image_id: image_id ? image_id : null,
+      gpu_status: gpu_status ? gpu_status : null,
+      gpu_index: gpuData ? gpuData.index : null,
+      org_id: org_id ? org_id : null,
+      macAddress: macAddress ? macAddress : null,
+      cpuSerialId: cpuSerialId ? cpuSerialId : null
+    }
+    console.log('Request Body in add gpu data: ' + JSON.stringify(requestBody))
 
-    await addSshCredientials();
+    try {
+      const response = await addSystemSpecs(requestBody)
+      insertedIds.push(response.id)
+    } catch (err) {
+      console.error('Error inserting data', err)
+      // Handle the error here
+    }
+    // }
+
+    await addSshCredientials(containerName)
+    console.log('Data Inserted.....indocker_ssh')
     const validInsertedIds = insertedIds.filter(id => id !== null)
     localStorage.setItem('current_job_id', validInsertedIds)
   } catch (err) {
@@ -85,10 +84,51 @@ export const addGpuData = async (
     throw err
   }
 }
-export const checkExistingRecord = async (user_id, gpu_index) => {
+export const addSystemSpecs = async requestBody => {
   try {
     const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}')
+    console.log('Token in add gpu data for addSystemSpecs: ' + token)
+    console.log('Here to call addSystemSpecs Api')
 
+    const response = await fetch(
+      `${config.apiUrl}/system_specs/addSystemSpecs`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token
+        },
+        body: JSON.stringify(requestBody)
+      }
+    ).then(response => response.json())
+    if (response.success) {
+      console.log('Response from addSystemSpecs', JSON.parse(response.request))
+      const jsonObject = JSON.parse(response.request)
+      console.log('Inserted data with ID:', response.request)
+
+      const insertedId = jsonObject[0].id
+      localStorage.setItem('current_job_id', insertedId)
+      return jsonObject[0].id
+    } else {
+      console.log('False response from Backend of addSystemSpecs.')
+    }
+  } catch (err) {
+    console.error('Error adding data via fetch', err)
+    throw err
+  }
+}
+export const checkExistingRecord = async (
+  macAddress,
+  cpuSerialId,
+  gpu_index,
+  user_id
+) => {
+  try {
+    const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}')
+    console.log('Token in Checking Existing Record:', token)
+    console.log('macAdress in checkExistingRecord:', macAddress)
+    console.log('cpuSerialId in checkExistingRecord:', cpuSerialId)
+    console.log('user_id in checkExistingRecord:', user_id)
     const response = await fetch(
       `${config.apiUrl}/system_specs/checkExistingRecord`,
       {
@@ -97,10 +137,10 @@ export const checkExistingRecord = async (user_id, gpu_index) => {
           'Content-Type': 'application/json',
           Authorization: token
         },
-        body: JSON.stringify({ user_id, gpu_index })
+        body: JSON.stringify({ macAddress, cpuSerialId, gpu_index, user_id })
       }
     ).then(response => response.json())
-    console.log('Resonse of Duplicate,', response.success)
+    console.log('Resonse of Duplicate Success?,', response.success)
     console.log('Response Received,', response)
     if (!response.success) {
       throw new Error('Failed to check duplicate GPU data')
@@ -187,7 +227,7 @@ export const removeUserGpuData = async user_id => {
       throw new Error('Failed to remove GPU data for user')
     }
 
-    const data = await response.json()
+    //const data = await response.json()
   } catch (err) {
     console.error('Error removing GPU data for user', err)
     throw err
@@ -247,31 +287,38 @@ export const getImageId = async user_id => {
 //   }
 // }
 
-export const updateGpuStatus = async (user_id, gpu_status) => {
+export const updateGpuStatus = async (
+  user_id,
+  macAddress,
+  cpuId,
+  gpu_status
+) => {
   try {
-    const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}');
-    const response = await fetch(`${config.apiUrl}/system_specs/updateGpuStatus`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      body: JSON.stringify({ user_id, gpu_status }),
-    });
+    const { token } = JSON.parse(localStorage.getItem('xhqr') || '{}')
+    const response = await fetch(
+      `${config.apiUrl}/system_specs/updateGpuStatus`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token
+        },
+        body: JSON.stringify({ user_id, macAddress, cpuId, gpu_status })
+      }
+    )
 
     if (!response.ok) {
-      throw new Error('Failed to update GPU status');
+      throw new Error('Failed to update GPU status')
     }
 
-    const data = await response.json();
-    console.log('Updated gpu_status for user:', user_id);
-    return data.success;
+    const data = await response.json()
+    console.log('Updated gpu_status for user:', user_id)
+    return data.success
   } catch (err) {
-    console.error('Error updating gpu_status', err);
-    throw err;
+    console.error('Error updating gpu_status', err)
+    throw err
   }
-};
-
+}
 
 // import { pool } from '../PoolConnection'
 // import { addSshCredientials } from '../../database/sshData'

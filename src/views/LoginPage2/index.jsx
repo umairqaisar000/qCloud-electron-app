@@ -2,21 +2,19 @@ import { useState } from 'react'
 import './style.scss'
 import {
   AuthNavBar,
-  ClickableText,
   InputField,
-  PrimaryButton
 } from 'qlu-20-ui-library'
 
 //import HomePage from "../HomePage/index.jsx";
 import { useNavigate, Link } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
+//import { useDispatch } from 'react-redux'
 //import { setUserData } from "../../reducers/userSlice";
 //import { isEmailValid } from "../../../utils";
 
 function Login() {
   //const SERVER_URL = import.meta.env.VITE_APP_SERVER_URL;
   const [email, setEmail] = useState('')
-  const dispatch = useDispatch()
+ // const dispatch = useDispatch()
   const [password, setPassword] = useState('')
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
@@ -47,10 +45,10 @@ function Login() {
       return
     }
 
-    const data = {
-      email,
-      password
-    }
+    // const data = {
+    //   email,
+    //   password
+    // }
     // dispatch(logIn(data));
 
     try {
